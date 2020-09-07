@@ -5,30 +5,39 @@ import {
   Streamlit,
 } from "./streamlit"
 
-import { VegaLite, SignalListener } from "react-vega";
+import { VegaLite, SignalListener, View } from "react-vega";
 
 const CHART_HEIGHT = 400;
 const CHART_WIDTH = 400;
 
-function handleSignals(name: string, payload: any) {
-  // console.log(args); // Inverse engeneering
-  Streamlit.setComponentValue({
-    name,
-    ...payload
-  })
+function handleNewView(view: View) {
+  console.log(view);
+  // Is there something in here that can be used to help with resolving selectionId to data values?
 }
 
 class VegaLiteEvents extends StreamlitComponentBase<{}> {
   public state = { numClicks: 0 }
 
-  // Signal listener type could probably be more specific: single, multi, or interval
-  private signalListeners: Record<string, SignalListener> = {
-    "highlight": handleSignals,
-    "select": handleSignals
-  }
+  // Signal listener type could probably be more specific: single, multi, or interval (brush)
+  private signalListeners: Record<string, SignalListener> = {}
 
   public componentDidMount() {
-    Streamlit.setFrameHeight(CHART_HEIGHT + 30); // some buffer for margin
+    Streamlit.setFrameHeight(CHART_HEIGHT + 30); // some buffer for axis labels
+  }
+
+  private handleSignals(name: string, payload: any) {
+    // if (payload['_vgsid_']) { // single and multi selection
+    //   // Need to resolve selections using the data values
+    // can't just use as row id in data, as it may not be clear which column the selection applied to
+    // In an MVP we could do a lookup in the spec key, but things may break down with multiple encodings.
+    // } else { // interval selection returns raw data values
+
+    // }
+
+    Streamlit.setComponentValue({
+      name,
+      ...payload
+    })
   }
 
   public render = (): ReactNode => {
@@ -40,20 +49,20 @@ class VegaLiteEvents extends StreamlitComponentBase<{}> {
 
     if (spec.selection) {
       Object.keys(spec.selection).forEach((key: string) => {
-        this.signalListeners[key] = handleSignals
-
+        this.signalListeners[key] = this.handleSignals
       })
     }
 
-
     return (
       <div>
-        <VegaLite spec={spec}
-                  signalListeners={this.signalListeners}
-                  data={data}
-                  width={CHART_WIDTH}
-                  height={CHART_HEIGHT}
-                  />
+        <VegaLite
+          data={data}
+          spec={spec}
+          signalListeners={this.signalListeners}
+          width={CHART_WIDTH}
+          height={CHART_HEIGHT}
+          onNewView={handleNewView}
+        />
       </div>
     )
   }

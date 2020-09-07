@@ -111,7 +111,8 @@ if not _RELEASE:
         "description": "A bar chart with on hover and selecting on click. (Inspired by Tableau's interaction style.)",
         "data": {"name": "myData"},
         "selection": {
-            "highlight": {"type": "single", "empty": "none", "on": "click"},
+            "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
+            "brush": {"type": "interval"},
             "select": {"type": "multi"}
         },
         "mark": {
