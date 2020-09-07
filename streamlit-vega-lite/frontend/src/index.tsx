@@ -1,10 +1,10 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import MyComponent from "./MyComponent"
+import VegaEventComponent from "./VegaEventComponent"
 
 ReactDOM.render(
   <React.StrictMode>
-    <MyComponent />
+    <VegaEventComponent />
   </React.StrictMode>,
   document.getElementById("root")
 )
