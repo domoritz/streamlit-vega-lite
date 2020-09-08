@@ -1,6 +1,6 @@
 # Streamlit Vega-Lite
 
-Making Vega Lite selection created by user interactions available in python.
+Making Vega-Lite selection created by user interactions available in Python.
 
 ## Dev Setup
 
