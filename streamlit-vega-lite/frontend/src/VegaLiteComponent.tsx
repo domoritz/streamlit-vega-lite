@@ -1,9 +1,9 @@
 import React, { ReactNode } from "react"
 import {
-  withStreamlitConnection,
-  StreamlitComponentBase,
   Streamlit,
-} from "./streamlit"
+  StreamlitComponentBase,
+  withStreamlitConnection
+} from "streamlit-component-lib";
 
 import { VegaLite, SignalListener, View } from "react-vega";
 
@@ -15,7 +15,7 @@ function handleNewView(view: View) {
   // Is there something in here that can be used to help with resolving selectionId to data values?
 }
 
-class VegaLiteEvents extends StreamlitComponentBase<{}> {
+class VegaLiteComponent extends StreamlitComponentBase<{}> {
   public state = { numClicks: 0 }
 
   // Signal listener type could probably be more specific: single, multi, or interval (brush)
@@ -68,4 +68,4 @@ class VegaLiteEvents extends StreamlitComponentBase<{}> {
   }
 }
 
-export default withStreamlitConnection(VegaLiteEvents)
+export default withStreamlitConnection(VegaLiteComponent)

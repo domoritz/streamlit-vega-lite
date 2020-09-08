@@ -9,7 +9,7 @@ import pandas as pd
 # release process.)
 _RELEASE = False
 
-COMPONENT_NAME = 'vega_lite_selector'
+COMPONENT_NAME = 'vega_lite_component'
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
@@ -40,7 +40,7 @@ else:
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
 # data can be a PD dataframe or a JSON dict... start with JSON first and investigate JSON table another time.
-def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
+def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
     """Returns event dictionary from the vega lite chart
 
     Parameters
@@ -80,85 +80,30 @@ def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
 if not _RELEASE:
     import streamlit as st
 
-    # Create an instance of our component with a constant `name` arg, and
-    # print its output value.
-    # vega_spec = {
-    #     "description": 'A local bar chart with embedded data from python',
-    #     "layer": [
-    #         {
-    #             "data": { "name": "myData" },
-    #             "encoding": {
-    #                 "x": {"field": 'a', "type": 'ordinal'},
-    #                 "y": {"field": 'b', "type": 'quantitative'},
-    #                 "strokeWidth": {
-    #                     "condition": { "selection": "highlight", "value": 1},
-    #                     "value": 2
-    #                 }
-    #             },
-    #             # https: // vega.github.io/vega-lite/docs/selection.html
-    #             "selection": {
-    #                 "highlight": {
-    #                     "type": "single",
-    #                      "on": "mouseover"
-    #                 }
-    #             },
-    #             "mark": "bar"
-    #         }
-    #     ]
-    # }
-
-    vega_spec = {
-        "description": "A bar chart with on hover and selecting on click. (Inspired by Tableau's interaction style.)",
-        "data": {"name": "myData"},
+    
+    vl_spec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+        "data": {
+            "name": "myData"
+        },
         "selection": {
-            "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
-            "brush": {"type": "interval"},
-            "select": {"type": "multi"}
+            "clicked": {"type": "multi", "empty": "none"}
         },
-        "mark": {
-            "type": "bar",
-            "fill": "#4C78A8",
-            "stroke": "black",
-            "cursor": "pointer"
-        },
+        "mark": "bar",
         "encoding": {
-            "x": {"field": "a", "type": "ordinal"},
+            "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
             "y": {"field": "b", "type": "quantitative"},
-            "fillOpacity": {
-                "condition": {"selection": "select", "value": 1},
-                "value": 0.3
-            },
-            "strokeWidth": {
-                "condition": [
-                    {
-                        "test": {
-                            "and": [
-                                {"selection": "select"},
-                                "length(data(\"select_store\"))"
-                            ]
-                        },
-                        "value": 2
-                    },
-                    {"selection": "highlight", "value": 1}
-                ],
-                "value": 0
-            }
-        },
-        "config": {
-            "scale": {
-                "bandPaddingInner": 0.2
+            "color": {
+            "condition": {"selection": "clicked", "value": "firebrick"},
+            "value": "steelblue"
             }
         }
     }
 
-    # df = pd.DataFrame({
-    #     'a': ['a', 'b', 'c'],
-    #     'b': [1 ,2, 3]
-    # })
-    st.subheader("Vega Lite + Streamlit Event Emitter")
+    st.subheader("Vega-Lite + Streamlit Event Emitter")
 
-    vega_data = {
-        "myData": [ # key should match the spec
+    data = {
+        "myData": [
             {"a": 'A', "b": 10},
             {"a": 'B', "b": 34},
             {"a": 'C', "b": 55},
@@ -171,24 +116,5 @@ if not _RELEASE:
         ],
     }
 
-    event_dict = vega_lite_events(spec=vega_spec, data=vega_data)
+    event_dict = vega_lite_component(spec=vl_spec, data=data)
     st.write(event_dict)
-
-    # df
-
-    # st.markdown("You've clicked %s times!" % int(num_clicks))
-
-    # st.markdown("---")
-
-
-    # Create a second instance of our component whose `name` arg will vary
-    # based on a text_input widget.
-    #
-    # We use the special "key" argument to assign a fixed identity to this
-    # component instance. By default, when a component's arguments change,
-    # it is considered a new instance and will be re-mounted on the frontend
-    # and lose its current state. In this case, we want to vary the component's
-    # "name" argument without having it get recreated.
-    # name_input = st.text_input("Enter a name", value="Streamlit")
-    # num_clicks = my_component(name_input, key="foo")
-    # st.markdown("You've clicked %s times!" % int(num_clicks))
