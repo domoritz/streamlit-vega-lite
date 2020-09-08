@@ -79,9 +79,9 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
 # app: `$ streamlit run my_component/__init__.py`
 if not _RELEASE:
     import streamlit as st
+    import numpy as np
 
-    
-    vl_spec = {
+    bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {
             "name": "myData"
@@ -94,15 +94,15 @@ if not _RELEASE:
             "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
             "y": {"field": "b", "type": "quantitative"},
             "color": {
-            "condition": {"selection": "clicked", "value": "firebrick"},
-            "value": "steelblue"
+                "condition": {"selection": "clicked", "value": "firebrick"},
+                "value": "steelblue"
             }
         }
     }
 
     st.subheader("Vega-Lite + Streamlit Event Emitter")
 
-    data = {
+    bar_data = {
         "myData": [
             {"a": 'A', "b": 10},
             {"a": 'B', "b": 34},
@@ -116,5 +116,35 @@ if not _RELEASE:
         ],
     }
 
-    event_dict = vega_lite_component(spec=vl_spec, data=data)
+    event_dict = vega_lite_component(spec=bar_spec, data=bar_data)
+    st.write(event_dict)
+
+
+    hist_spec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+        "data": {
+            "name": "myData"
+        },
+        "mark": "bar",
+        "selection": {
+            "brushed": {"type": "interval"}
+        },
+        "encoding": {
+            "x": {
+                "bin": True,
+                "field": "x"
+            },
+            "y": {"aggregate": "count"}
+        }
+    }
+
+
+    st.subheader("Vega-Lite + Streamlit Event Emitter")
+
+    np.random.seed(0)
+    hist_data = {
+        "myData": pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"]).to_dict(orient='records')
+    }
+
+    event_dict = vega_lite_component(spec=hist_spec, data=hist_data)
     st.write(event_dict)
