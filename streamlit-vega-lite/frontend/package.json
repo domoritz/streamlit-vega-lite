@@ -18,8 +18,11 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "typescript": "~3.7.2",
-    "react-vega": "^7.4.1"
+    "react-vega": "^7.4.1",
+    "streamlit-component-lib": "^1.0.0",
+    "typescript": "3.8",
+    "vega": "^5.15.0",
+    "vega-lite": "^4.15.0"
   },
   "scripts": {
     "start": "react-scripts start",
