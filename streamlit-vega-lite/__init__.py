@@ -11,17 +11,6 @@ _RELEASE = False
 
 COMPONENT_NAME = 'vega_lite_selector'
 
-# Declare a Streamlit component. `declare_component` returns a function
-# that is used to create instances of the component. We're naming this
-# function "_component_func", with an underscore prefix, because we don't want
-# to expose it directly to users. Instead, we will create a custom wrapper
-# function, below, that will serve as our component's public API.
-
-# It's worth noting that this call to `declare_component` is the
-# *only thing* you need to do to create the binding between Streamlit and
-# your component frontend. Everything else we do in this file is simply a
-# best practice.
-
 if not _RELEASE:
     _component_func = components.declare_component(
         COMPONENT_NAME,
@@ -39,15 +28,23 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-# data can be a PD dataframe or a JSON dict... start with JSON first and investigate JSON table another time.
 def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
-    """Returns event dictionary from the vega lite chart
+    """Returns event dictionary from the vega lite selection event
 
     Parameters
     ----------
-    name: str
-        The name of the thing we're saying hello to. The component will display
-        the text "Hello, {name}!"
+    spec: dict
+        A dictionary complying with the vega lite specification.
+        If "data" arg is an object, the "data" key in the spec will be unmodified.
+        If "data" arg is a pandas.Dataframe, the "data" key in the spec will be overwritten.
+
+        specs must contain a selection key, and selections must be "projected selections"
+        (meaning each selection must contain an "encodings" key with an array of dimensions, e.g. x, y)
+
+    data: dict or pandas.DataFrame
+        if object: this should be an object with key names corresponding to named data sources in spec.
+        if pandas.DataFrame: no special treatment is needed.
+
     key: str or None
         An optional key that uniquely identifies this component. If this is
         None, and the component's arguments are changed, the component will
@@ -55,22 +52,30 @@ def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
 
     Returns
     -------
-    int
-        The number of times the component's "Click Me" button has been clicked.
-        (This is the value passed to `Streamlit.setComponentValue` on the
-        frontend.)
+    dict
+        The selection object returned by interacting with the vega lite API.
+        Schema
+            name: string
+            [key corresponding a dimension]: [array of selected values along that dimension]
 
+        In the case of a multi selection, a key called "vlMulti" may be present too.
     """
     # Call through to our private component function. Arguments we pass here
     # will be sent to the frontend, where they'll be available in an "args"
     # dictionary.
 
+    # basic argument validation
+    if not spec.get('selection'):
+        raise ValueError('Spec must contain a selection')
+
+    for key in spec['selection']:
+        if not spec['selection'][key].get('encodings'):
+            raise ValueError('Every selection in spec must contain an encodings key')
+
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    component_value = _component_func(spec=spec, data=data, key=key, default=0)
+    component_value = _component_func(spec=spec, data=data, key=key, default={})
 
-    # We could modify the value returned from the component if we wanted.
-    # There's no need to do this in our simple example - but it's an option.
     return component_value
 
 
@@ -80,40 +85,13 @@ def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
 if not _RELEASE:
     import streamlit as st
 
-    # Create an instance of our component with a constant `name` arg, and
-    # print its output value.
-    # vega_spec = {
-    #     "description": 'A local bar chart with embedded data from python',
-    #     "layer": [
-    #         {
-    #             "data": { "name": "myData" },
-    #             "encoding": {
-    #                 "x": {"field": 'a', "type": 'ordinal'},
-    #                 "y": {"field": 'b', "type": 'quantitative'},
-    #                 "strokeWidth": {
-    #                     "condition": { "selection": "highlight", "value": 1},
-    #                     "value": 2
-    #                 }
-    #             },
-    #             # https: // vega.github.io/vega-lite/docs/selection.html
-    #             "selection": {
-    #                 "highlight": {
-    #                     "type": "single",
-    #                      "on": "mouseover"
-    #                 }
-    #             },
-    #             "mark": "bar"
-    #         }
-    #     ]
-    # }
-
     vega_spec = {
         "description": "A bar chart with on hover and selecting on click. (Inspired by Tableau's interaction style.)",
         "data": {"name": "myData"},
         "selection": {
-            "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
-            "brush": {"type": "interval"},
-            "select": {"type": "multi"}
+            "highlight": {"type": "single", "empty": "none", "on": "mouseover", "encodings": ['x']},
+            "brush": {"type": "interval", "encodings": ['x']},
+            "select": {"type": "multi", "encodings": ['x']}
         },
         "mark": {
             "type": "bar",
@@ -151,14 +129,9 @@ if not _RELEASE:
         }
     }
 
-    # df = pd.DataFrame({
-    #     'a': ['a', 'b', 'c'],
-    #     'b': [1 ,2, 3]
-    # })
     st.subheader("Vega Lite + Streamlit Event Emitter")
-
     vega_data = {
-        "myData": [ # key should match the spec
+        "myData": [ # key should match spec.data.name
             {"a": 'A', "b": 10},
             {"a": 'B', "b": 34},
             {"a": 'C', "b": 55},
@@ -173,6 +146,12 @@ if not _RELEASE:
 
     event_dict = vega_lite_events(spec=vega_spec, data=vega_data)
     st.write(event_dict)
+
+
+    df = pd.DataFrame({
+        'a': ['a', 'b', 'c'],
+        'b': [1 ,2, 3]
+    })
 
     # df
 
