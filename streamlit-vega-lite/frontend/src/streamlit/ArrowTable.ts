@@ -61,6 +61,7 @@ export class ArrowTable {
     this.dataTable = Table.from(dataBuffer)
     this.indexTable = Table.from(indexBuffer)
     this.columnsTable = Table.from(columnsBuffer)
+
     this.styler = styler
       ? {
           caption: styler.get("caption"),

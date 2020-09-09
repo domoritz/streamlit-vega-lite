@@ -28,7 +28,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
+def vega_lite_events(spec={}, data={}, width=200, height=200, key=None):
     """Returns event dictionary from the vega lite selection event
 
     Parameters
@@ -44,6 +44,12 @@ def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
     data: dict or pandas.DataFrame
         if object: this should be an object with key names corresponding to named data sources in spec.
         if pandas.DataFrame: no special treatment is needed.
+
+    width: number
+        chart width in pixels
+
+    height: number
+        chart height in pixels
 
     key: str or None
         An optional key that uniquely identifies this component. If this is
@@ -70,11 +76,20 @@ def vega_lite_events(spec={}, data=pd.DataFrame(), key=None):
 
     for key in spec['selection']:
         if not spec['selection'][key].get('encodings'):
-            raise ValueError('Every selection in spec must contain an encodings key')
+            raise ValueError(
+                'Every selection in spec must contain an encodings key')
+
+    # update spec to read the pandas dataframe
+    DATAFRAME_KEY = 'DATAFRAME_DATA'
+    if isinstance(data, pd.DataFrame):
+        spec['data'] = {
+            "name": DATAFRAME_KEY  # synchronize with
+        }
 
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    component_value = _component_func(spec=spec, data=data, key=key, default={})
+    component_value = _component_func(
+        spec=spec, data=data, dataframe_key=DATAFRAME_KEY, width=width, height=height, key=key, default={})
 
     return component_value
 
@@ -131,7 +146,7 @@ if not _RELEASE:
 
     st.subheader("Vega Lite + Streamlit Event Emitter")
     vega_data = {
-        "myData": [ # key should match spec.data.name
+        "myData": [  # key should match spec.data.name
             {"a": 'A', "b": 10},
             {"a": 'B', "b": 34},
             {"a": 'C', "b": 55},
@@ -144,21 +159,70 @@ if not _RELEASE:
         ],
     }
 
-    event_dict = vega_lite_events(spec=vega_spec, data=vega_data)
-    st.write(event_dict)
+    basic_event_dict = vega_lite_events(spec=vega_spec, data=vega_data, width=300, height=250)
+    st.write(basic_event_dict)
 
+    vega_spec_for_dataframe = {
+        "description": "A bar chart with on hover and selecting on click. (Inspired by Tableau's interaction style.)",
+        # note that the "data" key is omitted.
+        "selection": {
+            # appended two to the end of everything to avoid having name collisions with the other chart
+            "highlight_two": {"type": "single", "empty": "none", "on": "mouseover", "encodings": ['x']},
+            "brush_two": {"type": "interval", "encodings": ['x']},
+            "select_two": {"type": "multi", "encodings": ['x']}
+        },
+        "mark": {
+            "type": "bar",
+            "fill": "#4C78A8",
+            "stroke": "black",
+            "cursor": "pointer"
+        },
+        "encoding": {
+            "x": {"field": "0", "type": "ordinal"}, # text names not sent to frontend -> use stringified integers instead?
+            "y": {"field": "1", "type": "quantitative"},
+            "fillOpacity": {
+                "condition": {"selection": "select-two", "value": 1},
+                "value": 0.3
+            },
+            "strokeWidth": {
+                "condition": [
+                    {
+                        "test": {
+                            "and": [
+                                {"selection": "select_two"},
+                                "length(data(\"select_store\"))"
+                            ]
+                        },
+                        "value": 2
+                    },
+                    {"selection": "highlight_two", "value": 1}
+                ],
+                "value": 0
+            }
+        },
+        "config": {
+            "scale": {
+                "bandPaddingInner": 0.2
+            }
+        }
+    }
 
     df = pd.DataFrame({
-        'a': ['a', 'b', 'c'],
-        'b': [1 ,2, 3]
+        'a': ['a', 'b', 'c', 'e'], # the column names don't seem to matter
+        'b': [1, 50, 33, 34]
     })
 
-    # df
+    df
+
+    dataframe_event_dict = vega_lite_events(
+        spec=vega_spec_for_dataframe,
+        data=df, width=300, height=250)
+
+    st.write(dataframe_event_dict)
 
     # st.markdown("You've clicked %s times!" % int(num_clicks))
 
     # st.markdown("---")
-
 
     # Create a second instance of our component whose `name` arg will vary
     # based on a text_input widget.
