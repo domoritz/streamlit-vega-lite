@@ -3,13 +3,28 @@ import streamlit.components.v1 as components
 import pandas as pd
 
 
-# Create a _RELEASE constant. We'll set this to False while we're developing
-# the component, and True when we're ready to package and distribute it.
+# Create a _RELEASE constant. We"ll set this to False while we"re developing
+# the component, and True when we"re ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
 _RELEASE = False
 
+<<<<<<< HEAD
 COMPONENT_NAME = 'vega_lite_selector'
+=======
+COMPONENT_NAME = "vega_lite_component"
+
+# Declare a Streamlit component. `declare_component` returns a function
+# that is used to create instances of the component. We"re naming this
+# function "_component_func", with an underscore prefix, because we don"t want
+# to expose it directly to users. Instead, we will create a custom wrapper
+# function, below, that will serve as our component"s public API.
+
+# It"s worth noting that this call to `declare_component` is the
+# *only thing* you need to do to create the binding between Streamlit and
+# your component frontend. Everything else we do in this file is simply a
+# best practice.
+>>>>>>> master
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -22,15 +37,15 @@ else:
     _component_func = components.declare_component(
         COMPONENT_NAME, path=build_dir)
 
-
-def vega_lite_component(spec={}, data={}, width=200, height=200, key=None):
-    """Returns event dictionary from the vega lite selection event
-
+def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
+    """Returns selections from the Vega-Lite chart.
 
     Parameters
     ----------
     spec: dict
-        A dictionary complying with the vega lite specification.
+        The Vega-Lite spec for the chart. See https://vega.github.io/vega-lite/docs/
+        for more info.
+
         If "data" arg is an object, the "data" key in the spec will be unmodified.
         If "data" arg is a pandas.Dataframe, the "data" key in the spec will be overwritten.
 
@@ -41,24 +56,17 @@ def vega_lite_component(spec={}, data={}, width=200, height=200, key=None):
         if object: this should be an object with key names corresponding to named data sources in spec.
         if pandas.DataFrame: no special treatment is needed.
 
-    width: number
-        chart width in pixels
 
-    height: number
-        chart height in pixels
 
     key: str or None
         An optional key that uniquely identifies this component. If this is
-        None, and the component's arguments are changed, the component will
+        None, and the component"s arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
 
     Returns
     -------
     dict
-        The selection object returned by interacting with the vega lite API.
-        Schema
-            name: string
-            [key corresponding a dimension]: [array of selected values along that dimension]
+        The selections from the chart.
 
         In the case of a multi selection, a key called "vlMulti" may be present too.
     """
@@ -79,15 +87,11 @@ def vega_lite_component(spec={}, data={}, width=200, height=200, key=None):
             "name": DATAFRAME_KEY  # synchronize with
         }
 
-    # "default" is a special argument that specifies the initial return
-    # value of the component before the user has interacted with it.
-    component_value = _component_func(
-        spec=spec, data=data, dataframe_key=DATAFRAME_KEY, width=width, height=height, key=key, default={})
-
-    return component_value
+    return  _component_func(
+        spec=spec, data=data, dataframe_key=DATAFRAME_KEY, key=key, default={})
 
 
-# Add some test code to play with the component while it's in development.
+# Add some test code to play with the component while it"s in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
 if not _RELEASE:
@@ -117,15 +121,15 @@ if not _RELEASE:
 
     bar_data = {
         "myData": [
-            {"a": 'A', "b": 10},
-            {"a": 'B', "b": 34},
-            {"a": 'C', "b": 55},
-            {"a": 'D', "b": 19},
-            {"a": 'E', "b": 40},
-            {"a": 'F', "b": 34},
-            {"a": 'G', "b": 91},
-            {"a": 'H', "b": 78},
-            {"a": 'I', "b": 25},
+            {"a": "A", "b": 10},
+            {"a": "B", "b": 34},
+            {"a": "C", "b": 55},
+            {"a": "D", "b": 19},
+            {"a": "E", "b": 40},
+            {"a": "F", "b": 34},
+            {"a": "G", "b": 91},
+            {"a": "H", "b": 78},
+            {"a": "I", "b": 25},
         ],
     }
 

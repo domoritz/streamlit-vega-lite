@@ -1,10 +1,11 @@
-import React from "react"
-import ReactDOM from "react-dom"
-import VegaLiteEventComponent from "./VegaLiteEventComponent"
+import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import ReactDOM from "react-dom";
+import VegaLiteComponent from "./VegaLiteComponent";
 
 ReactDOM.render(
   <React.StrictMode>
-    <VegaLiteEventComponent />
+    <VegaLiteComponent />
   </React.StrictMode>,
   document.getElementById("root")
 )
