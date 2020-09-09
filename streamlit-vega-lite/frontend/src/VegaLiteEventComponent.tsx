@@ -3,7 +3,7 @@ import {
   withStreamlitConnection,
   Streamlit,
   ArrowTable
-} from "./streamlit"
+} from "streamlit-component-lib"
 
 import { VegaLite, SignalListener, VisualizationSpec, PlainObject } from "react-vega";
 import { Table } from "apache-arrow"
