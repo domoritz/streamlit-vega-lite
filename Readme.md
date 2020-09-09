@@ -1,6 +1,8 @@
 # Streamlit Vega-Lite
 
-Making Vega-Lite selection created by user interactions available in Python.
+**🐉 Work in progress. Do not use yet.**
+
+Making Vega-Lite selection created by user interactions available in Python. Works with [Altair](https://altair-viz.github.io/).
 
 ## Dev Setup
 

@@ -3,21 +3,21 @@ import streamlit.components.v1 as components
 import pandas as pd
 
 
-# Create a _RELEASE constant. We'll set this to False while we're developing
-# the component, and True when we're ready to package and distribute it.
+# Create a _RELEASE constant. We"ll set this to False while we"re developing
+# the component, and True when we"re ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
 _RELEASE = False
 
-COMPONENT_NAME = 'vega_lite_component'
+COMPONENT_NAME = "vega_lite_component"
 
 # Declare a Streamlit component. `declare_component` returns a function
-# that is used to create instances of the component. We're naming this
-# function "_component_func", with an underscore prefix, because we don't want
+# that is used to create instances of the component. We"re naming this
+# function "_component_func", with an underscore prefix, because we don"t want
 # to expose it directly to users. Instead, we will create a custom wrapper
-# function, below, that will serve as our component's public API.
+# function, below, that will serve as our component"s public API.
 
-# It's worth noting that this call to `declare_component` is the
+# It"s worth noting that this call to `declare_component` is the
 # *only thing* you need to do to create the binding between Streamlit and
 # your component frontend. Everything else we do in this file is simply a
 # best practice.
@@ -33,48 +33,81 @@ else:
     _component_func = components.declare_component(
         COMPONENT_NAME, path=build_dir)
 
-
-# Create a wrapper function for the component. This is an optional
-# best practice - we could simply expose the component function returned by
-# `declare_component` and call it done. The wrapper allows us to customize
-# our component's API: we can pre-process its input args, post-process its
-# output value, and add a docstring for users.
-# data can be a PD dataframe or a JSON dict... start with JSON first and investigate JSON table another time.
 def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
-    """Returns event dictionary from the vega lite chart
+    """Returns selections from the Vega-Lite chart.
 
     Parameters
     ----------
-    name: str
-        The name of the thing we're saying hello to. The component will display
-        the text "Hello, {name}!"
+    spec: dict
+        The Vega-Lite spec for the chart. See https://vega.github.io/vega-lite/docs/
+        for more info.
     key: str or None
         An optional key that uniquely identifies this component. If this is
-        None, and the component's arguments are changed, the component will
+        None, and the component"s arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
 
     Returns
     -------
-    int
-        The number of times the component's "Click Me" button has been clicked.
-        (This is the value passed to `Streamlit.setComponentValue` on the
-        frontend.)
+    dict
+        The selections from the chart.
 
     """
-    # Call through to our private component function. Arguments we pass here
-    # will be sent to the frontend, where they'll be available in an "args"
-    # dictionary.
-
-    # "default" is a special argument that specifies the initial return
-    # value of the component before the user has interacted with it.
-    component_value = _component_func(spec=spec, data=data, key=key, default=0)
-
-    # We could modify the value returned from the component if we wanted.
-    # There's no need to do this in our simple example - but it's an option.
-    return component_value
+    return _component_func(spec=spec, data=data, key=key, default={})
 
 
-# Add some test code to play with the component while it's in development.
+def altair_component(altair_chart, key=None):
+    """Returns selections from the Altair chart.
+
+    Parameters
+    ----------
+    altair_chart: altair.vegalite.v2.api.Chart
+        The Altair chart object to display.
+    key: str or None
+        An optional key that uniquely identifies this component. If this is
+        None, and the component"s arguments are changed, the component will
+        be re-mounted in the Streamlit frontend and lose its current state.
+
+    Returns
+    -------
+    dict
+        The selections from the chart.
+
+    """
+
+    # TODO get spec and data from altair_chart
+
+    return vega_lite_component(spec=spec, data=data, key=key, default={})
+
+
+def extract_data(altair_chart):
+    import altair as alt
+
+    # Normally altair_chart.to_dict() would transform the dataframe used by the
+    # chart into an array of dictionaries. To avoid that, we install a
+    # transformer that replaces datasets with a reference by the object id of
+    # the dataframe. We then fill in the dataset manually later on.
+
+    datasets = {}
+
+    def id_transform(data):
+        """Altair data transformer that returns a fake named dataset with the
+        object id."""
+        datasets[id(data)] = data
+        return {"name": str(id(data))}
+
+    alt.data_transformers.register("id", id_transform)
+
+    with alt.data_transformers.enable("id"):
+        chart_dict = altair_chart.to_dict()
+
+        # Put datasets back into the chart dict but note how they weren"t
+        # transformed.
+        chart_dict["datasets"] = datasets
+
+        return chart_dict
+
+
+# Add some test code to play with the component while it"s in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
 if not _RELEASE:
@@ -104,15 +137,15 @@ if not _RELEASE:
 
     bar_data = {
         "myData": [
-            {"a": 'A', "b": 10},
-            {"a": 'B', "b": 34},
-            {"a": 'C', "b": 55},
-            {"a": 'D', "b": 19},
-            {"a": 'E', "b": 40},
-            {"a": 'F', "b": 34},
-            {"a": 'G', "b": 91},
-            {"a": 'H', "b": 78},
-            {"a": 'I', "b": 25},
+            {"a": "A", "b": 10},
+            {"a": "B", "b": 34},
+            {"a": "C", "b": 55},
+            {"a": "D", "b": 19},
+            {"a": "E", "b": 40},
+            {"a": "F", "b": 34},
+            {"a": "G", "b": 91},
+            {"a": "H", "b": 78},
+            {"a": "I", "b": 25},
         ],
     }
 
@@ -143,7 +176,10 @@ if not _RELEASE:
 
     np.random.seed(0)
     hist_data = {
-        "myData": pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"]).to_dict(orient='records')
+        "myData": pd.DataFrame(
+            np.random.normal(42, 10, (200, 1)),
+            columns=["x"]
+        ).to_dict(orient="records")
     }
 
     event_dict = vega_lite_component(spec=hist_spec, data=hist_data)
