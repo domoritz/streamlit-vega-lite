@@ -1,7 +1,7 @@
 # Streamlit Vega-Lite
 
 [![code style black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/streamlit-vega-lite)](https://pypi.org/project/streamlit-vega-lite)
+[![PyPI - Downloads](https://img.shields.io/pypi/v/streamlit-vega-lite)](https://pypi.org/project/streamlit-vega-lite)
 
 **🐉 Work in progress. Do not use yet.**
 
