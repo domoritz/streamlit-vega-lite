@@ -9,22 +9,7 @@ import pandas as pd
 # release process.)
 _RELEASE = False
 
-<<<<<<< HEAD
-COMPONENT_NAME = 'vega_lite_selector'
-=======
-COMPONENT_NAME = "vega_lite_component"
-
-# Declare a Streamlit component. `declare_component` returns a function
-# that is used to create instances of the component. We"re naming this
-# function "_component_func", with an underscore prefix, because we don"t want
-# to expose it directly to users. Instead, we will create a custom wrapper
-# function, below, that will serve as our component"s public API.
-
-# It"s worth noting that this call to `declare_component` is the
-# *only thing* you need to do to create the binding between Streamlit and
-# your component frontend. Everything else we do in this file is simply a
-# best practice.
->>>>>>> master
+COMPONENT_NAME = 'vega_lite_component'
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -37,7 +22,7 @@ else:
     _component_func = components.declare_component(
         COMPONENT_NAME, path=build_dir)
 
-def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
+def vega_lite_component(spec={}, data={}, key=None):
     """Returns selections from the Vega-Lite chart.
 
     Parameters
@@ -56,8 +41,6 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
         if object: this should be an object with key names corresponding to named data sources in spec.
         if pandas.DataFrame: no special treatment is needed.
 
-
-
     key: str or None
         An optional key that uniquely identifies this component. If this is
         None, and the component"s arguments are changed, the component will
@@ -66,7 +49,11 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
     Returns
     -------
     dict
-        The selections from the chart.
+        The selection object returned by the chart.
+
+        Schema
+            name: string
+            [key corresponding a dimension]: [array of selected values along that dimension]
 
         In the case of a multi selection, a key called "vlMulti" may be present too.
     """
@@ -84,11 +71,12 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
     DATAFRAME_KEY = 'DATAFRAME_DATA'
     if isinstance(data, pd.DataFrame):
         spec['data'] = {
-            "name": DATAFRAME_KEY  # synchronize with
+            "name": DATAFRAME_KEY
         }
 
-    return  _component_func(
+    return _component_func(
         spec=spec, data=data, dataframe_key=DATAFRAME_KEY, key=key, default={})
+
 
 
 # Add some test code to play with the component while it"s in development.
@@ -134,7 +122,7 @@ if not _RELEASE:
     }
 
     basic_event_dict = vega_lite_component(
-        spec=bar_spec, data=bar_data, width=300, height=250)
+        spec=bar_spec, data=bar_data)
     st.write(basic_event_dict)
 
     hist_spec = {
@@ -152,11 +140,10 @@ if not _RELEASE:
         }
     }
 
-
     np.random.seed(0)
     hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
     hist_data
 
     hist_event_dict = vega_lite_component(
-        spec=hist_spec, data=hist_data, width=300, height=250)
+        spec=hist_spec, data=hist_data)
     st.write(hist_event_dict)
