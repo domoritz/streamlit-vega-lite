@@ -8,16 +8,18 @@ import {
 import { VegaLite, SignalListener, VisualizationSpec, PlainObject } from "react-vega";
 import { Table } from "apache-arrow"
 
-// import {arrow} from 'vega-loader-arrow';
 import { arrow } from './arrow-loader';
+
+type VisualizationSpecWithDimensions = VisualizationSpec & {
+  height?: number;
+  width?: number;
+}
 
 interface VegaLiteEventsProps {
   args: {
-    spec: VisualizationSpec; // vega lite spec
+    spec: VisualizationSpecWithDimensions;
     data: Table | PlainObject;
     dataframe_key: string; // only used if data is a dataframe
-    width: number;
-    height: number;
   }
 }
 
@@ -30,7 +32,8 @@ function handleSignals(name: string, payload: any) {
 
 const VegaLiteEvents: React.FC<VegaLiteEventsProps> = (props) => {
 
-  const { spec, height, width, data, dataframe_key } = props.args;
+  const { spec, data, dataframe_key } = props.args;
+  const { height = 200, width = 200 } = spec;
 
   useEffect(() => {
     Streamlit.setFrameHeight(height + 30); // some buffer for axis labels
