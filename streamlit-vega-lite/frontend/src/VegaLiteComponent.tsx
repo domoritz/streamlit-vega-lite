@@ -1,39 +1,27 @@
-import React, { ReactNode } from "react"
+import React, { ReactNode } from "react";
+import { SignalListener, VegaLite, View } from "react-vega";
 import {
   Streamlit,
   StreamlitComponentBase,
   withStreamlitConnection
 } from "streamlit-component-lib";
 
-import { VegaLite, SignalListener, View } from "react-vega";
-
-const CHART_HEIGHT = 400;
-const CHART_WIDTH = 400;
-
-function handleNewView(view: View) {
-  console.log(view);
-  // Is there something in here that can be used to help with resolving selectionId to data values?
-}
 
 class VegaLiteComponent extends StreamlitComponentBase<{}> {
-  public state = { numClicks: 0 }
-
   // Signal listener type could probably be more specific: single, multi, or interval (brush)
   private signalListeners: Record<string, SignalListener> = {}
 
   public componentDidMount() {
-    Streamlit.setFrameHeight(CHART_HEIGHT + 30); // some buffer for axis labels
+    Streamlit.setFrameHeight(100);
+  }
+
+  public handleNewView(view: View) {
+    view.addResizeListener((_, height) => {
+      Streamlit.setFrameHeight(height);
+    });
   }
 
   private handleSignals(name: string, payload: any) {
-    // if (payload['_vgsid_']) { // single and multi selection
-    //   // Need to resolve selections using the data values
-    // can't just use as row id in data, as it may not be clear which column the selection applied to
-    // In an MVP we could do a lookup in the spec key, but things may break down with multiple encodings.
-    // } else { // interval selection returns raw data values
-
-    // }
-
     Streamlit.setComponentValue({
       name,
       ...payload
@@ -48,8 +36,8 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
     const data = this.props.args["data"] || {};
 
     if (spec.selection) {
-      Object.keys(spec.selection).forEach((key: string) => {
-        this.signalListeners[key] = this.handleSignals
+      Object.keys(spec.selection).forEach((selectionName: string) => {
+        this.signalListeners[selectionName] = this.handleSignals
       })
     }
 
@@ -59,9 +47,7 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
           data={data}
           spec={spec}
           signalListeners={this.signalListeners}
-          width={CHART_WIDTH}
-          height={CHART_HEIGHT}
-          onNewView={handleNewView}
+          onNewView={this.handleNewView}
         />
       </div>
     )
