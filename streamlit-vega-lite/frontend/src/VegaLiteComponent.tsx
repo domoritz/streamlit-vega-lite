@@ -1,53 +1,67 @@
-import React, { ReactNode } from "react";
+import React, { useMemo } from "react";
 import { SignalListener, VegaLite, View } from "react-vega";
 import {
-  Streamlit,
-  StreamlitComponentBase,
+  ArrowTable, Streamlit,
   withStreamlitConnection
 } from "streamlit-component-lib";
-import {arrow} from './arrow-loader';
+import { TopLevelSpec } from "vega-lite";
+import { arrow } from './arrow-loader';
 
+interface Args {
+    spec: TopLevelSpec,
+    [name: string]: any
+}
 
-class VegaLiteComponent extends StreamlitComponentBase<{}> {
-  // Signal listener type could probably be more specific: single, multi, or interval (brush)
-  private signalListeners: Record<string, SignalListener> = {}
+interface VegaLiteComponentProps {
+  args: Args
+}
 
-  public handleNewView(view: View) {
-    view.addResizeListener((_, height) => {
-      Streamlit.setFrameHeight(height);
-    });
-  }
+function handleSignals(name: string, payload: any) {
+  Streamlit.setComponentValue({
+    name,
+    ...payload
+  })
+}
 
-  private handleSignals(name: string, payload: any) {
-    Streamlit.setComponentValue({
-      name,
-      ...payload
-    })
-  }
+function handleNewView(view: View) {
+  view.addResizeListener((_, height) => {
+    Streamlit.setFrameHeight(height);
+  });
+}
 
-  public render = (): ReactNode => {
-    const {spec, ...args} = this.props.args;
+const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
+  const {spec, ...args} = props.args;
 
-    if (spec.selection) {
-      for (const selectionName of Object.keys(spec.selection)) {
-        this.signalListeners[selectionName] = this.handleSignals
+  const signalListeners = useMemo(() => {
+    const listenerMap: Record<string, SignalListener> = {};
+
+    if ('selection' in spec) {
+      for (const selectionName of Object.keys(spec.selection!)) {
+        listenerMap[selectionName] = handleSignals
       }
     }
 
+    return listenerMap;
+  }, [spec]);
+
+  const data = useMemo(() => {
     const data: Record<string, any> = {};
     for (const name of Object.keys(args ?? {})) {
-      data[name] = arrow(args[name].table);
+      const table: ArrowTable = args[name];
+      data[name] = arrow(table.table);
     }
 
-    return (
-      <VegaLite
-        data={data}
-        spec={spec}
-        signalListeners={this.signalListeners}
-        onNewView={this.handleNewView}
-      />
-    )
-  }
+    return data;
+  }, [args]);
+
+  return (
+    <VegaLite
+      data={data}
+      spec={spec}
+      signalListeners={signalListeners}
+      onNewView={handleNewView}
+    />
+  )
 }
 
 export default withStreamlitConnection(VegaLiteComponent)
