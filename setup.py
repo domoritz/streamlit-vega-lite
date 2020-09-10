@@ -6,7 +6,7 @@ setuptools.setup(
     author="Dominik Moritz",
     author_email="",
     description="",
-    long_description="A Vega-Lite Component for Streamlit",
+    long_description="A Vega-Lite Component for Streamlit that Supports Selections",
     long_description_content_type="text/plain",
     url="",
     packages=setuptools.find_packages(),

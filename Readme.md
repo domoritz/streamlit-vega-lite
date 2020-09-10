@@ -44,3 +44,7 @@ Run Prettier for other formatting in the frontend directory.
 ```
 yarn format
 ```
+
+## Publish
+
+See https://docs.streamlit.io/en/stable/publish_streamlit_components.html.
