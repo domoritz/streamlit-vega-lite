@@ -12,10 +12,6 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
   // Signal listener type could probably be more specific: single, multi, or interval (brush)
   private signalListeners: Record<string, SignalListener> = {}
 
-  public componentDidMount() {
-    Streamlit.setFrameHeight(100);
-  }
-
   public handleNewView(view: View) {
     view.addResizeListener((_, height) => {
       Streamlit.setFrameHeight(height);
@@ -30,7 +26,6 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
   }
 
   public render = (): ReactNode => {
-    console.log(this.props)
     const {spec, ...args} = this.props.args;
 
     if (spec.selection) {
@@ -45,14 +40,12 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
     }
 
     return (
-      <div>
-        <VegaLite
-          data={data}
-          spec={spec}
-          signalListeners={this.signalListeners}
-          onNewView={this.handleNewView}
-        />
-      </div>
+      <VegaLite
+        data={data}
+        spec={spec}
+        signalListeners={this.signalListeners}
+        onNewView={this.handleNewView}
+      />
     )
   }
 }
