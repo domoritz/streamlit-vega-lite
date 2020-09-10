@@ -3,24 +3,11 @@ import streamlit.components.v1 as components
 import pandas as pd
 
 
-# Create a _RELEASE constant. We"ll set this to False while we"re developing
-# the component, and True when we"re ready to package and distribute it.
-# (This is, of course, optional - there are innumerable ways to manage your
-# release process.)
+# Set this to False while we're developing the component, and True when we're
+# ready to package and distribute it.
 _RELEASE = False
 
 COMPONENT_NAME = "vega_lite_component"
-
-# Declare a Streamlit component. `declare_component` returns a function
-# that is used to create instances of the component. We"re naming this
-# function "_component_func", with an underscore prefix, because we don"t want
-# to expose it directly to users. Instead, we will create a custom wrapper
-# function, below, that will serve as our component"s public API.
-
-# It"s worth noting that this call to `declare_component` is the
-# *only thing* you need to do to create the binding between Streamlit and
-# your component frontend. Everything else we do in this file is simply a
-# best practice.
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -76,12 +63,6 @@ def altair_component(altair_chart, key=None):
 
     """
 
-    # TODO get spec and data from altair_chart
-
-    return vega_lite_component(spec=spec, data=data, key=key, default={})
-
-
-def extract_data(altair_chart):
     import altair as alt
 
     # Normally altair_chart.to_dict() would transform the dataframe used by the
@@ -94,19 +75,16 @@ def extract_data(altair_chart):
     def id_transform(data):
         """Altair data transformer that returns a fake named dataset with the
         object id."""
-        datasets[id(data)] = data
-        return {"name": str(id(data))}
+        name = f'd{id(data)}'
+        datasets[name] = data.to_dict(orient="records")  # TODO: remove
+        return {"name": name}
 
     alt.data_transformers.register("id", id_transform)
 
     with alt.data_transformers.enable("id"):
         chart_dict = altair_chart.to_dict()
 
-        # Put datasets back into the chart dict but note how they weren"t
-        # transformed.
-        chart_dict["datasets"] = datasets
-
-        return chart_dict
+    return _component_func(spec=chart_dict, **datasets, key=key, default={})
 
 
 # Add some test code to play with the component while it"s in development.
@@ -115,6 +93,7 @@ def extract_data(altair_chart):
 if not _RELEASE:
     import streamlit as st
     import numpy as np
+    import altair as alt
 
     bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
@@ -178,7 +157,19 @@ if not _RELEASE:
     hist_data = pd.DataFrame(
         np.random.normal(42, 10, (200, 1)),
         columns=["x"]
-    ).to_dict(orient="records")  # TODO: remove
+    )
 
-    event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data)
+    event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data.to_dict(orient="records"))  # TODO: remove to_dict
+    st.write(event_dict)
+
+
+    st.subheader("Altair + Streamlit Event Emitter")
+
+    brushed = alt.selection_interval(encodings=['x'])
+    chart = alt.Chart(hist_data).mark_bar().encode(
+        alt.X('x:Q', bin=True),
+        y='count()',
+    ).add_selection(brushed)
+
+    event_dict = altair_component(altair_chart=chart)
     st.write(event_dict)
