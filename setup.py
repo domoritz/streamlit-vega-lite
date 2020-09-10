@@ -8,7 +8,7 @@ setuptools.setup(
     description="A Vega-Lite Component for Streamlit that Supports Selections",
     long_description="",
     long_description_content_type="text/plain",
-    url="",
+    url="https://github.com/domoritz/streamlit-vega-lite",
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[],
