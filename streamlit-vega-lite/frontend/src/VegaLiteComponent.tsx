@@ -47,8 +47,8 @@ const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
   const data = useMemo(() => {
     const data: Record<string, any> = {};
     for (const name of Object.keys(args ?? {})) {
-      const table: ArrowTable = args[name];
-      data[name] = arrow(table.table);
+      const table = args[name];
+      data[name] = table instanceof ArrowTable ? arrow(table.table) : table;
     }
 
     return data;

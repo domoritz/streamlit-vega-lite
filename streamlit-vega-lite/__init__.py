@@ -147,7 +147,7 @@ if not _RELEASE:
         {"a": "G", "b": 91},
         {"a": "H", "b": 78},
         {"a": "I", "b": 25},
-    ])
+    ]).to_dict(orient="records")  # TODO: remove
 
     event_dict = vega_lite_component(spec=bar_spec, bar_data=bar_data)
     st.write(event_dict)
@@ -178,7 +178,7 @@ if not _RELEASE:
     hist_data = pd.DataFrame(
         np.random.normal(42, 10, (200, 1)),
         columns=["x"]
-    )
+    ).to_dict(orient="records")  # TODO: remove
 
     event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data)
     st.write(event_dict)
