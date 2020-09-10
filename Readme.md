@@ -7,6 +7,12 @@
 
 Making Vega-Lite selection created by user interactions available in Python. Works with [Altair](https://altair-viz.github.io/).
 
+For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit-vega-lite/__init__.py. 
+
+## Documentation
+
+TODO
+
 ## Dev Setup
 
 Open two terminals in the dev container using VSCode's [Remote Containers Extension](https://code.visualstudio.com/docs/remote/containers).
