@@ -19,7 +19,7 @@ interface VegaLiteEventsProps {
   args: {
     spec: VisualizationSpecWithDimensions;
     data: Table | PlainObject;
-    dataframe_key: string; // only used if data is a dataframe
+    dataframe_key: string; // only used if data is a dataframe (Table)
   }
 }
 
@@ -31,17 +31,16 @@ function handleSignals(name: string, payload: any) {
 }
 
 const VegaLiteEvents: React.FC<VegaLiteEventsProps> = (props) => {
-
   const { spec, data, dataframe_key } = props.args;
   const { height = 200, width = 200 } = spec;
 
   useEffect(() => {
-    Streamlit.setFrameHeight(height + 30); // some buffer for axis labels
+    Streamlit.setFrameHeight(height + 30); // magic number buffer for X axis labels
   }, [height]);
 
   const signalListeners = useMemo(() => {
     const listenerMap: Record<string, SignalListener> = {};
-    // Override typecheck since "selection" is missing from the defintion for VLSpecs
+    // Override type since "selection" is missing from the defintion for VisualizationSpec
     Object.keys((spec as any).selection).forEach((key: string) => {
       listenerMap[key] = handleSignals
     });
@@ -51,8 +50,6 @@ const VegaLiteEvents: React.FC<VegaLiteEventsProps> = (props) => {
 
   const dataAsObject = useMemo(() => {
     if (data instanceof ArrowTable) {
-      console.log(data.table.length)
-      console.log(data.table instanceof Table)
       return {
         [dataframe_key]: arrow(data.table)
       }
