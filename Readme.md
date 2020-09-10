@@ -30,3 +30,17 @@ yarn start
 ```
 
 Then open http://localhost:8501/.
+
+## Style
+
+Run Black for Python formatting.
+
+```
+black . -l 120
+```
+
+Run Prettier for other formatting in the frontend directory.
+
+```
+yarn format
+```

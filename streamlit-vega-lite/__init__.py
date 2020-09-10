@@ -10,15 +10,12 @@ _RELEASE = False
 COMPONENT_NAME = "vega_lite_component"
 
 if not _RELEASE:
-    _component_func = components.declare_component(
-        COMPONENT_NAME,
-        url="http://localhost:3001",
-    )
+    _component_func = components.declare_component(COMPONENT_NAME, url="http://localhost:3001",)
 else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, "frontend/build")
-    _component_func = components.declare_component(
-        COMPONENT_NAME, path=build_dir)
+    _component_func = components.declare_component(COMPONENT_NAME, path=build_dir)
+
 
 def vega_lite_component(spec={}, key=None, **kwargs):
     """Returns selections from the Vega-Lite chart.
@@ -41,6 +38,17 @@ def vega_lite_component(spec={}, key=None, **kwargs):
         The selections from the chart.
 
     """
+
+    print(spec)
+
+    # basic argument validation
+    if not spec.get("selection"):
+        raise ValueError("Spec must contain selection")
+
+    for selection in spec["selection"].values():
+        if (selection["type"] == "single" or selection["type"] == "multi") and not selection.get("encodings"):
+            raise ValueError("Every single and multi selection in spec must contain an encodings key")
+
     return _component_func(spec=spec, **kwargs, key=key, default={})
 
 
@@ -75,7 +83,7 @@ def altair_component(altair_chart, key=None):
     def id_transform(data):
         """Altair data transformer that returns a fake named dataset with the
         object id."""
-        name = f'd{id(data)}'
+        name = f"d{id(data)}"
         datasets[name] = data.to_dict(orient="records")  # TODO: remove
         return {"name": name}
 
@@ -97,79 +105,59 @@ if not _RELEASE:
 
     bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-        "data": {
-            "name": "bar_data"
-        },
-        "selection": {
-            "clicked": {"type": "multi", "empty": "none"}
-        },
+        "data": {"name": "bar_data"},
+        "selection": {"clicked": {"type": "multi", "empty": "none", "encodings": ["x"]}},
         "mark": "bar",
         "encoding": {
             "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
             "y": {"field": "b", "type": "quantitative"},
-            "color": {
-                "condition": {"selection": "clicked", "value": "firebrick"},
-                "value": "steelblue"
-            }
-        }
+            "color": {"condition": {"selection": "clicked", "value": "firebrick"}, "value": "steelblue",},
+        },
     }
 
     st.subheader("Vega-Lite + Streamlit Event Emitter")
 
-    bar_data = pd.DataFrame([
-        {"a": "A", "b": 10},
-        {"a": "B", "b": 34},
-        {"a": "C", "b": 55},
-        {"a": "D", "b": 19},
-        {"a": "E", "b": 40},
-        {"a": "F", "b": 34},
-        {"a": "G", "b": 91},
-        {"a": "H", "b": 78},
-        {"a": "I", "b": 25},
-    ]).to_dict(orient="records")  # TODO: remove
+    bar_data = pd.DataFrame(
+        [
+            {"a": "A", "b": 10},
+            {"a": "B", "b": 34},
+            {"a": "C", "b": 55},
+            {"a": "D", "b": 19},
+            {"a": "E", "b": 40},
+            {"a": "F", "b": 34},
+            {"a": "G", "b": 91},
+            {"a": "H", "b": 78},
+            {"a": "I", "b": 25},
+        ]
+    ).to_dict(
+        orient="records"
+    )  # TODO: remove
 
     event_dict = vega_lite_component(spec=bar_spec, bar_data=bar_data)
     st.write(event_dict)
 
-
     hist_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-        "data": {
-            "name": "hist_data"
-        },
+        "data": {"name": "hist_data"},
         "mark": "bar",
-        "selection": {
-            "brushed": {"type": "interval"}
-        },
-        "encoding": {
-            "x": {
-                "bin": True,
-                "field": "x"
-            },
-            "y": {"aggregate": "count"}
-        }
+        "selection": {"brushed": {"type": "interval"}},
+        "encoding": {"x": {"bin": True, "field": "x"}, "y": {"aggregate": "count"}},
     }
-
 
     st.subheader("Vega-Lite + Streamlit Event Emitter")
 
     np.random.seed(0)
-    hist_data = pd.DataFrame(
-        np.random.normal(42, 10, (200, 1)),
-        columns=["x"]
-    )
+    hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
 
-    event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data.to_dict(orient="records"))  # TODO: remove to_dict
+    event_dict = vega_lite_component(
+        spec=hist_spec, hist_data=hist_data.to_dict(orient="records")
+    )  # TODO: remove to_dict
     st.write(event_dict)
-
 
     st.subheader("Altair + Streamlit Event Emitter")
 
-    brushed = alt.selection_interval(encodings=['x'])
-    chart = alt.Chart(hist_data).mark_bar().encode(
-        alt.X('x:Q', bin=True),
-        y='count()',
-    ).add_selection(brushed)
+    brushed = alt.selection_interval(encodings=["x"])
+    chart = alt.Chart(hist_data).mark_bar().encode(alt.X("x:Q", bin=True), y="count()",).add_selection(brushed)
 
     event_dict = altair_component(altair_chart=chart)
     st.write(event_dict)

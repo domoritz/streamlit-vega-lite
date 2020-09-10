@@ -1,26 +1,27 @@
 import React, { useMemo } from "react";
 import { SignalListener, VegaLite, View } from "react-vega";
 import {
-  ArrowTable, Streamlit,
-  withStreamlitConnection
+  ArrowTable,
+  Streamlit,
+  withStreamlitConnection,
 } from "streamlit-component-lib";
 import { TopLevelSpec } from "vega-lite";
-import { arrow } from './arrow-loader';
+import { arrow } from "./arrow-loader";
 
 interface Args {
-    spec: TopLevelSpec,
-    [name: string]: any
+  spec: TopLevelSpec;
+  [name: string]: any;
 }
 
 interface VegaLiteComponentProps {
-  args: Args
+  args: Args;
 }
 
 function handleSignals(name: string, payload: any) {
   Streamlit.setComponentValue({
     name,
-    ...payload
-  })
+    ...payload,
+  });
 }
 
 function handleNewView(view: View) {
@@ -30,14 +31,14 @@ function handleNewView(view: View) {
 }
 
 const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
-  const {spec, ...args} = props.args;
+  const { spec, ...args } = props.args;
 
   const signalListeners = useMemo(() => {
     const listenerMap: Record<string, SignalListener> = {};
 
-    if ('selection' in spec) {
+    if ("selection" in spec) {
       for (const selectionName of Object.keys(spec.selection!)) {
-        listenerMap[selectionName] = handleSignals
+        listenerMap[selectionName] = handleSignals;
       }
     }
 
@@ -61,7 +62,7 @@ const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
       signalListeners={signalListeners}
       onNewView={handleNewView}
     />
-  )
-}
+  );
+};
 
-export default withStreamlitConnection(VegaLiteComponent)
+export default withStreamlitConnection(VegaLiteComponent);

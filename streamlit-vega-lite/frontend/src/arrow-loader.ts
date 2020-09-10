@@ -1,14 +1,14 @@
 // Forked from vega-arrow-loader for debugging/type safety/simplified type signature
 // https://github.com/vega/vega-loader-arrow/blob/master/src/arrow.js
 
-import { Table } from 'apache-arrow';
+import { Table } from "apache-arrow";
 
-const RowIndex = Symbol('rowIndex');
+const RowIndex = Symbol("rowIndex");
 
 // Convert arrow table to an array of proxy objects
 export function arrow(table: Table) {
-    const proxy = rowProxy(table)
-    const rows = Array(table.length);
+  const proxy = rowProxy(table);
+  const rows = Array(table.length);
 
   for (let i = 0, n = rows.length; i < n; ++i) {
     rows[i] = proxy(i);
@@ -18,7 +18,7 @@ export function arrow(table: Table) {
 }
 
 function rowProxy(table: Table) {
-  const fields = table.schema.fields.map(d => d.name);
+  const fields = table.schema.fields.map((d) => d.name);
   const proto = {};
 
   fields.forEach((name, index) => {
@@ -32,9 +32,9 @@ function rowProxy(table: Table) {
         return column?.get(this[RowIndex]);
       },
       set: function () {
-        throw Error('Arrow field values can not be overwritten.');
+        throw Error("Arrow field values can not be overwritten.");
       },
-      enumerable: true
+      enumerable: true,
     });
   });
 
