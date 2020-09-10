@@ -15,7 +15,7 @@ type VisualizationSpecWithDimensions = VisualizationSpec & {
   width?: number;
 }
 
-interface VegaLiteEventsProps {
+interface VegaLiteComponentProps {
   args: {
     spec: VisualizationSpecWithDimensions;
     data: Table | PlainObject;
@@ -30,7 +30,7 @@ function handleSignals(name: string, payload: any) {
   })
 }
 
-const VegaLiteEvents: React.FC<VegaLiteEventsProps> = (props) => {
+const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
   const { spec, data, dataframe_key } = props.args;
   const { height = 200, width = 200 } = spec;
 
@@ -69,4 +69,4 @@ const VegaLiteEvents: React.FC<VegaLiteEventsProps> = (props) => {
   )
 }
 
-export default withStreamlitConnection(VegaLiteEvents)
+export default withStreamlitConnection(VegaLiteComponent)
