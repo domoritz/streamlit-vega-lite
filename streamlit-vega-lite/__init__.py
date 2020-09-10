@@ -78,6 +78,54 @@ def vega_lite_component(spec={}, data={}, key=None):
         spec=spec, data=data, dataframe_key=DATAFRAME_KEY, key=key, default={})
 
 
+def altair_component(altair_chart, key=None):
+    """Returns selections from the Altair chart.
+    Parameters
+    ----------
+    altair_chart: altair.vegalite.v2.api.Chart
+        The Altair chart object to display.
+    key: str or None
+        An optional key that uniquely identifies this component. If this is
+        None, and the component"s arguments are changed, the component will
+        be re-mounted in the Streamlit frontend and lose its current state.
+    Returns
+    -------
+    dict
+        The selections from the chart.
+    """
+
+    # TODO get spec and data from altair_chart
+
+    return vega_lite_component(spec=spec, data=data, key=key, default={})
+
+
+def extract_data(altair_chart):
+    import altair as alt
+
+    # Normally altair_chart.to_dict() would transform the dataframe used by the
+    # chart into an array of dictionaries. To avoid that, we install a
+    # transformer that replaces datasets with a reference by the object id of
+    # the dataframe. We then fill in the dataset manually later on.
+
+    datasets = {}
+
+    def id_transform(data):
+        """Altair data transformer that returns a fake named dataset with the
+        object id."""
+        datasets[id(data)] = data
+        return {"name": str(id(data))}
+
+    alt.data_transformers.register("id", id_transform)
+
+    with alt.data_transformers.enable("id"):
+        chart_dict = altair_chart.to_dict()
+
+        # Put datasets back into the chart dict but note how they weren"t
+        # transformed.
+        chart_dict["datasets"] = datasets
+
+        return chart_dict
+
 
 # Add some test code to play with the component while it"s in development.
 # During development, we can run this just as we would any other Streamlit
