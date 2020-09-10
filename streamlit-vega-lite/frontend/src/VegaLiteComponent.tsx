@@ -5,6 +5,7 @@ import {
   StreamlitComponentBase,
   withStreamlitConnection
 } from "streamlit-component-lib";
+import {arrow} from './arrow-loader';
 
 
 class VegaLiteComponent extends StreamlitComponentBase<{}> {
@@ -29,16 +30,18 @@ class VegaLiteComponent extends StreamlitComponentBase<{}> {
   }
 
   public render = (): ReactNode => {
-    const spec = this.props.args["spec"] || {};
-
-    // TODO: add support for processing dataframes directly
-    // Need arrow -> object conversion function
-    const data = this.props.args["data"] || {};
+    console.log(this.props)
+    const {spec, ...args} = this.props.args;
 
     if (spec.selection) {
-      Object.keys(spec.selection).forEach((selectionName: string) => {
+      for (const selectionName of Object.keys(spec.selection)) {
         this.signalListeners[selectionName] = this.handleSignals
-      })
+      }
+    }
+
+    const data: Record<string, any> = {};
+    for (const name of Object.keys(args ?? {})) {
+      data[name] = arrow(args[name].table);
     }
 
     return (

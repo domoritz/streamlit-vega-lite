@@ -33,7 +33,7 @@ else:
     _component_func = components.declare_component(
         COMPONENT_NAME, path=build_dir)
 
-def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
+def vega_lite_component(spec={}, key=None, **kwargs):
     """Returns selections from the Vega-Lite chart.
 
     Parameters
@@ -45,6 +45,8 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
         An optional key that uniquely identifies this component. If this is
         None, and the component"s arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
+    **kwargs: pandas.DataFrame or list
+        Datasets to be passed to the spec via named datasets.
 
     Returns
     -------
@@ -52,7 +54,7 @@ def vega_lite_component(spec={}, data=pd.DataFrame(), key=None):
         The selections from the chart.
 
     """
-    return _component_func(spec=spec, data=data, key=key, default={})
+    return _component_func(spec=spec, **kwargs, key=key, default={})
 
 
 def altair_component(altair_chart, key=None):
@@ -117,7 +119,7 @@ if not _RELEASE:
     bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {
-            "name": "myData"
+            "name": "bar_data"
         },
         "selection": {
             "clicked": {"type": "multi", "empty": "none"}
@@ -135,28 +137,26 @@ if not _RELEASE:
 
     st.subheader("Vega-Lite + Streamlit Event Emitter")
 
-    bar_data = {
-        "myData": [
-            {"a": "A", "b": 10},
-            {"a": "B", "b": 34},
-            {"a": "C", "b": 55},
-            {"a": "D", "b": 19},
-            {"a": "E", "b": 40},
-            {"a": "F", "b": 34},
-            {"a": "G", "b": 91},
-            {"a": "H", "b": 78},
-            {"a": "I", "b": 25},
-        ],
-    }
+    bar_data = pd.DataFrame([
+        {"a": "A", "b": 10},
+        {"a": "B", "b": 34},
+        {"a": "C", "b": 55},
+        {"a": "D", "b": 19},
+        {"a": "E", "b": 40},
+        {"a": "F", "b": 34},
+        {"a": "G", "b": 91},
+        {"a": "H", "b": 78},
+        {"a": "I", "b": 25},
+    ])
 
-    event_dict = vega_lite_component(spec=bar_spec, data=bar_data)
+    event_dict = vega_lite_component(spec=bar_spec, bar_data=bar_data)
     st.write(event_dict)
 
 
     hist_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {
-            "name": "myData"
+            "name": "hist_data"
         },
         "mark": "bar",
         "selection": {
@@ -175,12 +175,10 @@ if not _RELEASE:
     st.subheader("Vega-Lite + Streamlit Event Emitter")
 
     np.random.seed(0)
-    hist_data = {
-        "myData": pd.DataFrame(
-            np.random.normal(42, 10, (200, 1)),
-            columns=["x"]
-        ).to_dict(orient="records")
-    }
+    hist_data = pd.DataFrame(
+        np.random.normal(42, 10, (200, 1)),
+        columns=["x"]
+    )
 
-    event_dict = vega_lite_component(spec=hist_spec, data=hist_data)
+    event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data)
     st.write(event_dict)
