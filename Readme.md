@@ -9,6 +9,8 @@ Making Vega-Lite selection created by user interactions available in Python. Wor
 
 For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit-vega-lite/__init__.py. 
 
+<img src="./demo.gif" alt="Demo screencast" width=400></img>
+
 ## Documentation
 
 ### Installation
@@ -36,12 +38,16 @@ def altair_histogram():
     return (
         alt.Chart(hist_data)
         .mark_bar()
-        .encode(alt.X("x:Q", bin=True), y="count()",)
+        .encode(alt.X("x:Q", bin=True), y="count()")
         .add_selection(brushed)
     )
 
 event_dict = altair_component(altair_chart=altair_histogram())
-st.write(event_dict)
+
+r = event_dict.get("x")
+if r:
+    filtered = hist_data[(hist_data.x >= r[0]) & (hist_data.x < r[1])]
+    st.write(filtered)
 ```
 
 ## Dev Setup

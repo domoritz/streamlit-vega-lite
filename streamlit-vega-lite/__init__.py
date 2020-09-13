@@ -195,6 +195,6 @@ if not _RELEASE:
     print_range(r)
 
     if r:
-        filtered = hist_data[hist_data.x >= r[0]][hist_data.x < r[1]]
+        filtered = hist_data[(hist_data.x >= r[0]) & (hist_data.x < r[1])]
         st.write(filtered)
 
