@@ -10,7 +10,9 @@ _RELEASE = False
 COMPONENT_NAME = "vega_lite_component"
 
 if not _RELEASE:
-    _component_func = components.declare_component(COMPONENT_NAME, url="http://localhost:3001",)
+    _component_func = components.declare_component(
+        COMPONENT_NAME, url="http://localhost:3001",
+    )
 else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, "frontend/build")
@@ -39,15 +41,19 @@ def vega_lite_component(spec={}, key=None, **kwargs):
 
     """
 
-    print(spec)
-
     # basic argument validation
     if not spec.get("selection"):
         raise ValueError("Spec must contain selection")
 
     for selection in spec["selection"].values():
-        if (selection["type"] == "single" or selection["type"] == "multi") and not selection.get("encodings"):
-            raise ValueError("Every single and multi selection in spec must contain an encodings key")
+        if (
+            (selection["type"] == "single" or selection["type"] == "multi")
+            and not selection.get("encodings")
+            and not selection.get("fields")
+        ):
+            raise ValueError(
+                "Every single and multi selection in spec must be projected onto encodings or fields."
+            )
 
     return _component_func(spec=spec, **kwargs, key=key, default={})
 
@@ -80,11 +86,14 @@ def altair_component(altair_chart, key=None):
 
     datasets = {}
 
+    # make a copy of the chart so that we don't have to rerender it even if nothing changed
+    altair_chart = altair_chart.copy()
+
     def id_transform(data):
         """Altair data transformer that returns a fake named dataset with the
         object id."""
         name = f"d{id(data)}"
-        datasets[name] = data.to_dict(orient="records")  # TODO: remove
+        datasets[name] = data
         return {"name": name}
 
     alt.data_transformers.register("id", id_transform)
@@ -103,19 +112,24 @@ if not _RELEASE:
     import numpy as np
     import altair as alt
 
+    st.subheader("Vega-Lite + Streamlit Event Emitter")
+
     bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {"name": "bar_data"},
-        "selection": {"clicked": {"type": "multi", "empty": "none", "encodings": ["x"]}},
+        "selection": {
+            "clicked": {"type": "multi", "empty": "none", "encodings": ["x"]}
+        },
         "mark": "bar",
         "encoding": {
             "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
             "y": {"field": "b", "type": "quantitative"},
-            "color": {"condition": {"selection": "clicked", "value": "firebrick"}, "value": "steelblue",},
+            "color": {
+                "condition": {"selection": "clicked", "value": "firebrick"},
+                "value": "steelblue",
+            },
         },
     }
-
-    st.subheader("Vega-Lite + Streamlit Event Emitter")
 
     bar_data = pd.DataFrame(
         [
@@ -129,12 +143,15 @@ if not _RELEASE:
             {"a": "H", "b": 78},
             {"a": "I", "b": 25},
         ]
-    ).to_dict(
-        orient="records"
-    )  # TODO: remove
+    )
 
     event_dict = vega_lite_component(spec=bar_spec, bar_data=bar_data)
-    st.write(event_dict)
+    selection = event_dict.get("a")
+    if selection:
+        fields = " and ".join(selection)
+        st.write(f"You selected on { fields }.")
+    else:
+        st.write("You haven't selected any bars yet.")
 
     hist_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
@@ -149,15 +166,35 @@ if not _RELEASE:
     np.random.seed(0)
     hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
 
-    event_dict = vega_lite_component(
-        spec=hist_spec, hist_data=hist_data.to_dict(orient="records")
-    )  # TODO: remove to_dict
-    st.write(event_dict)
+    event_dict = vega_lite_component(spec=hist_spec, hist_data=hist_data)
+
+    def print_range(r):
+        st.write(
+            f"You selected data in the range of {r[0]:.1f} to {r[1]:.1f}."
+            if r
+            else "You haven't selected anything yet."
+        )
+    
+    print_range(event_dict.get("x"))
 
     st.subheader("Altair + Streamlit Event Emitter")
 
-    brushed = alt.selection_interval(encodings=["x"])
-    chart = alt.Chart(hist_data).mark_bar().encode(alt.X("x:Q", bin=True), y="count()",).add_selection(brushed)
+    @st.cache
+    def make_altair_histogram():
+        brushed = alt.selection_interval(encodings=["x"], name="brushed")
+        return (
+            alt.Chart(hist_data)
+            .mark_bar()
+            .encode(alt.X("x:Q", bin=True), y="count()",)
+            .add_selection(brushed)
+        )
 
+    chart = make_altair_histogram()
     event_dict = altair_component(altair_chart=chart)
-    st.write(event_dict)
+    r = event_dict.get("x")
+    print_range(r)
+
+    if r:
+        filtered = hist_data[hist_data.x >= r[0]][hist_data.x < r[1]]
+        st.write(filtered)
+

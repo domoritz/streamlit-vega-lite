@@ -49,7 +49,7 @@ const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
     const data: Record<string, any> = {};
     for (const name of Object.keys(args ?? {})) {
       const table = args[name];
-      data[name] = table instanceof ArrowTable ? arrow(table.table) : table;
+      data[name] = table instanceof ArrowTable ? arrow(table) : table;
     }
 
     return data;
