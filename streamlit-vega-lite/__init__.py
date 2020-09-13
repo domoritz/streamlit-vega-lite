@@ -153,6 +153,8 @@ if not _RELEASE:
     else:
         st.write("You haven't selected any bars yet.")
 
+    st.subheader("Vega-Lite + Streamlit Event Emitter")
+
     hist_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {"name": "hist_data"},
@@ -160,8 +162,6 @@ if not _RELEASE:
         "selection": {"brushed": {"type": "interval"}},
         "encoding": {"x": {"bin": True, "field": "x"}, "y": {"aggregate": "count"}},
     }
-
-    st.subheader("Vega-Lite + Streamlit Event Emitter")
 
     np.random.seed(0)
     hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
@@ -174,7 +174,7 @@ if not _RELEASE:
             if r
             else "You haven't selected anything yet."
         )
-    
+
     print_range(event_dict.get("x"))
 
     st.subheader("Altair + Streamlit Event Emitter")
