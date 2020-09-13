@@ -3,7 +3,7 @@
 [![code style black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI - Downloads](https://img.shields.io/pypi/v/streamlit-vega-lite)](https://pypi.org/project/streamlit-vega-lite)
 
-**🐉 Work in progress. Do not use yet.**
+**🐉 Here be dragons. This is a proof of concept.**
 
 Making Vega-Lite selection created by user interactions available in Python. Works with [Altair](https://altair-viz.github.io/).
 
@@ -11,7 +11,38 @@ For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/st
 
 ## Documentation
 
-TODO
+### Installation
+
+`pip install streamlit-vega-lite`
+
+### Usage
+
+There are two functions available. `vega_lite_component` expects a Vega-Lite specification as a dictionary and any named datasets as keyword arguments. The datasets will be transferred as efficient Arrow tables. `altair_component` supports Altair charts and automatically extracts all datasets and transfers them as Arrow dataframes.
+
+#### Example
+
+```python
+import altair as alt
+import streamlit as st
+import pandas as pd
+from streamlit_vega_lite import vega_lite_component, altair_component
+
+hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
+
+@st.cache
+def altair_histogram():
+    brushed = alt.selection_interval(encodings=["x"], name="brushed")
+
+    return (
+        alt.Chart(hist_data)
+        .mark_bar()
+        .encode(alt.X("x:Q", bin=True), y="count()",)
+        .add_selection(brushed)
+    )
+
+event_dict = altair_component(altair_chart=altair_histogram())
+st.write(event_dict)
+```
 
 ## Dev Setup
 
