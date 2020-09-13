@@ -170,7 +170,7 @@ if not _RELEASE:
 
     def print_range(r):
         st.write(
-            f"You selected data in the range of {r[0]:.1f} to {r[1]:.1f}."
+            f"You selected data in the range from {r[0]:.1f} to {r[1]:.1f}."
             if r
             else "You haven't selected anything yet."
         )
