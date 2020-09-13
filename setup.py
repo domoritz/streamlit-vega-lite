@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit-vega-lite",
-    version="0.0.1",
+    version="0.0.2",
     author="Dominik Moritz, Cameron Yick",
     author_email="",
     description="A Vega-Lite Component for Streamlit that Supports Selections",
