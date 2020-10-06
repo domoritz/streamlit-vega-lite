@@ -94,3 +94,13 @@ yarn format
 ## Publish
 
 See https://docs.streamlit.io/en/stable/publish_streamlit_components.html.
+
+Make sure that `_RELEASE` is set to `True`.
+
+```sh
+pushd streamlit_vega_lite/frontend
+yarn build
+popd
+python setup.py sdist bdist_wheel
+python3 -m twine upload --repository pypi dist/*
+```
