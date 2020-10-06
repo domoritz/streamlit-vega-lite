@@ -7,7 +7,7 @@
 
 Making Vega-Lite selection created by user interactions available in Python. Works with [Altair](https://altair-viz.github.io/).
 
-For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit_vega_lite/__init__.py. 
+For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit_vega_lite/__init__.py. You can also try the demo at https://github.com/domoritz/streamlit-vega-lite-demo. 
 
 <img src="./demo.gif" alt="Demo screencast" width=400></img>
 
