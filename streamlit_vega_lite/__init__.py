@@ -5,7 +5,7 @@ import pandas as pd
 
 # Set this to False while we're developing the component, and True when we're
 # ready to package and distribute it.
-_RELEASE = False
+_RELEASE = True
 
 COMPONENT_NAME = "vega_lite_component"
 
@@ -196,5 +196,4 @@ if not _RELEASE:
 
     if r:
         filtered = hist_data[(hist_data.x >= r[0]) & (hist_data.x < r[1])]
-        st.write(filtered)
-
+        st.write(filtered.describe())

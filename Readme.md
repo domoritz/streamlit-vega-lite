@@ -7,7 +7,7 @@
 
 Making Vega-Lite selection created by user interactions available in Python. Works with [Altair](https://altair-viz.github.io/).
 
-For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit-vega-lite/__init__.py. 
+For examples, see https://github.com/domoritz/streamlit-vega-lite/blob/master/streamlit_vega_lite/__init__.py. 
 
 <img src="./demo.gif" alt="Demo screencast" width=400></img>
 
@@ -61,14 +61,14 @@ In the first terminal, run:
 pip install -e .
 
 # Launch streamlit app
-streamlit run streamlit-vega-lite/__init__.py
+streamlit run streamlit_vega_lite/__init__.py
 ```
 
 In the second terminal:
 
 ```bash
 # Switch to location of frontend code
-cd streamlit-vega-lite/frontend
+cd streamlit_vega_lite/frontend
 # Install dependencies
 yarn
 # Launch frontend assets

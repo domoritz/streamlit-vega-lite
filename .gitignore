@@ -1,6 +1,6 @@
-streamlit-vega-lite/frontend/node_modules
-streamlit-vega-lite/frontend/build
-streamlit-vega-lite/frontend/yarn-error.log
+streamlit_vega_lite/frontend/node_modules
+streamlit_vega_lite/frontend/build
+streamlit_vega_lite/frontend/yarn-error.log
 streamlit_vega_lite.egg-info/
 build
 dist

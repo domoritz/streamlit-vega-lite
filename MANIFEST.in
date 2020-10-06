@@ -1,1 +1,1 @@
-recursive-include streamlit-vega-lite/frontend/build *
+recursive-include streamlit_vega_lite/frontend/build *
