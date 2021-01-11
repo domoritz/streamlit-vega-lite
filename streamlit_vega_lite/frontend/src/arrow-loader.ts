@@ -1,6 +1,4 @@
-import {
-  ArrowTable,
-} from "streamlit-component-lib";
+import { ArrowTable } from "streamlit-component-lib";
 
 // Forked from vega-arrow-loader for debugging/type safety/simplified type signature and support for ArrowTable.
 // https://github.com/vega/vega-loader-arrow/blob/master/src/arrow.js

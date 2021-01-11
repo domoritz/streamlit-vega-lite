@@ -4,3 +4,4 @@ streamlit_vega_lite/frontend/yarn-error.log
 streamlit_vega_lite.egg-info/
 build
 dist
+streamlit_vega_lite/frontend/.eslintcache

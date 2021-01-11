@@ -5,13 +5,14 @@ import pandas as pd
 
 # Set this to False while we're developing the component, and True when we're
 # ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 COMPONENT_NAME = "vega_lite_component"
 
 if not _RELEASE:
     _component_func = components.declare_component(
-        COMPONENT_NAME, url="http://localhost:3001",
+        COMPONENT_NAME,
+        url="http://localhost:3001",
     )
 else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -51,9 +52,7 @@ def vega_lite_component(spec={}, key=None, **kwargs):
             and not selection.get("encodings")
             and not selection.get("fields")
         ):
-            raise ValueError(
-                "Every single and multi selection in spec must be projected onto encodings or fields."
-            )
+            raise ValueError("Every single and multi selection in spec must be projected onto encodings or fields.")
 
     return _component_func(spec=spec, **kwargs, key=key, default={})
 
@@ -117,9 +116,7 @@ if not _RELEASE:
     bar_spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
         "data": {"name": "bar_data"},
-        "selection": {
-            "clicked": {"type": "multi", "empty": "none", "encodings": ["x"]}
-        },
+        "selection": {"clicked": {"type": "multi", "empty": "none", "encodings": ["x"]}},
         "mark": "bar",
         "encoding": {
             "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
@@ -185,7 +182,10 @@ if not _RELEASE:
         return (
             alt.Chart(hist_data)
             .mark_bar()
-            .encode(alt.X("x:Q", bin=True), y="count()",)
+            .encode(
+                alt.X("x:Q", bin=True),
+                y="count()",
+            )
             .add_selection(brushed)
         )
 
