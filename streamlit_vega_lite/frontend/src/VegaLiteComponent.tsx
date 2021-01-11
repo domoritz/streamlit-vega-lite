@@ -5,7 +5,7 @@ import {
   Streamlit,
   withStreamlitConnection,
 } from "streamlit-component-lib";
-import { TopLevelSpec } from "vega-lite";
+import { isEmpty, TopLevelSpec } from "vega-lite";
 import { arrow } from "./arrow-loader";
 
 interface Args {
@@ -49,7 +49,9 @@ const VegaLiteComponent: React.FC<VegaLiteComponentProps> = (props) => {
     const data: Record<string, any> = {};
     for (const name of Object.keys(args ?? {})) {
       const table = args[name];
-      data[name] = table instanceof ArrowTable ? arrow(table) : table;
+      if (table && !isEmpty(table)) {
+        data[name] = table instanceof ArrowTable ? arrow(table) : table;
+      }
     }
 
     return data;
