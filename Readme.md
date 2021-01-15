@@ -27,6 +27,7 @@ There are two functions available. `vega_lite_component` expects a Vega-Lite spe
 import altair as alt
 import streamlit as st
 import pandas as pd
+import numpy as np
 from streamlit_vega_lite import vega_lite_component, altair_component
 
 hist_data = pd.DataFrame(np.random.normal(42, 10, (200, 1)), columns=["x"])
