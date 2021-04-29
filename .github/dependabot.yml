@@ -3,7 +3,14 @@ updates:
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: weekly
-    time: "04:00"
-    timezone: America/Vancouver
+    interval: monthly
+    time: "23:00"
+    timezone: PST8PDT
+  open-pull-requests-limit: 10
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "23:00"
+    timezone: PST8PDT
   open-pull-requests-limit: 10
